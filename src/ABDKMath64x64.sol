@@ -5,6 +5,8 @@
  */
 pragma solidity ^0.8.0;
 
+import {console2} from "forge-std/Test.sol";
+
 /**
  * Smart contract library of mathematical functions operating with signed
  * 64.64-bit fixed point numbers.  Signed 64.64-bit fixed point number is
@@ -17,12 +19,14 @@ library ABDKMath64x64 {
   /*
    * Minimum value signed 64.64-bit fixed point number may have. 
    */
-  int128 private constant MIN_64x64 = -0x80000000000000000000000000000000;
+  int128 public constant MIN_64x64 = -0x80000000000000000000000000000000;
 
   /*
    * Maximum value signed 64.64-bit fixed point number may have. 
    */
-  int128 private constant MAX_64x64 = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+  int128 public constant MAX_64x64 = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+
+  uint256 public constant DECIMAL_PRECISION = 1 ether;
 
   /**
    * Convert signed 256-bit integer number into signed 64.64-bit fixed point
@@ -77,6 +81,28 @@ library ABDKMath64x64 {
       require (x >= 0);
       return uint64 (uint128 (x >> 64));
     }
+  }
+
+  // From: https://github.com/laurens-van-kessenich/polaris_temp/blob/c833a8a83f78ca8be5248038cc7e9deeba63513e/src/Utils/Math.sol#L12
+  function fromDecimal(int256 x) internal pure returns (int128) {
+    int256 ret = (x << 64) / int256(DECIMAL_PRECISION);
+    require(type(int128).min <= ret && ret <= type(int128).max);
+    return int128(ret);
+  }
+
+  function fromUnsignedDecimal(uint256 x) internal pure returns (int128) {
+    uint256 ret = (x << 64) / DECIMAL_PRECISION;
+    require(ret <= uint128(type(int128).max));
+    return int128(int256(ret));
+  }
+
+  function toUnsignedDecimal(int128 x) internal pure returns (uint256) {
+    require(x >= 0);
+    return (uint256(uint128(x)) * DECIMAL_PRECISION) >> 64;
+  }
+
+  function toDecimal(int128 x) internal pure returns (int256) {
+    return (int256(x) * int256(DECIMAL_PRECISION)) >> 64;
   }
 
   /**
