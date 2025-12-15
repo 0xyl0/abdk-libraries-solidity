@@ -6,9 +6,7 @@ import {console2} from "forge-std/Test.sol";
 import {ABDKMath64x64 as Math} from "src/ABDKMath64x64.sol";
 
 contract ABDKMath64x64 is Test {
-
-    function setUp() public {
-    }
+    function setUp() public {}
 
     function _cast(int128 x) internal returns (uint256) {
         return uint256(uint128(x));
@@ -33,7 +31,9 @@ contract ABDKMath64x64 is Test {
         // min
         console2.log("min fixed point 64.64");
         int128 minLog = Math.log_2(1);
-        console2.log(Math.toUnsignedDecimal(1), "1 to dec (1/2^64) = 5.4e-20 (fixed point has better decimal precision!)");
+        console2.log(
+            Math.toUnsignedDecimal(1), "1 to dec (1/2^64) = 5.4e-20 (fixed point has better decimal precision!)"
+        );
         console2.log(_cast(minLog), "minLog");
         console2.log("minLog to dec");
         console2.log(Math.toDecimal(minLog));
@@ -142,18 +142,14 @@ contract ABDKMath64x64 is Test {
         // min
         console2.log("");
         console2.log("min");
-        /* TODO!!
+        /*
          * y log x >= -59.8e18 (from log_2 min uint test), y < 2e18
          * log x >= -29.8
          * x >= 1e18 * 2^2.2 / 2^32
          */
-        uint256 minX = 1e18 * 436 / 100 / uint256(1<<32);
-        //uint256 minX = 1e10;
+        uint256 minX = 1e18 * 436 / 100 / uint256(1 << 32);
         uint256 minY = 2e18 - 1;
         console2.log(minX, "minX");
-        //console2.log("mul:");
-        //console2.log(Math.mul(Math.fromUnsignedDecimal(minY), Math.log_2(Math.fromUnsignedDecimal(minX))));
-        //console2.log(Math.toDecimal(Math.mul(Math.fromUnsignedDecimal(minY), Math.log_2(Math.fromUnsignedDecimal(minX)))));
         uint256 minP = Math.pow(minX, minY);
         console2.log(minP, "minP");
         assertGt(minP, 0, "Reached product zero");
@@ -166,19 +162,16 @@ contract ABDKMath64x64 is Test {
          * log x <= (63e18 - 1) / 2e18 ~= 31.5
          * x <= 2^(31.5) = 2^32 / 2^(1/2) <= 2^32 / 1.4143
          */
-        uint256 maxX = uint256(1<<32) * 10000 / 14143 * 1e18;
+        uint256 maxX = uint256(1 << 32) * 10000 / 14143 * 1e18;
         uint256 maxY = 2e18 - 1;
         console2.log(maxX, "maxX");
-        //console2.log("mul:");
-        //console2.log(Math.mul(Math.fromUnsignedDecimal(maxY), Math.log_2(Math.fromUnsignedDecimal(maxX))));
-        //console2.log(Math.toDecimal(Math.mul(Math.fromUnsignedDecimal(maxY), Math.log_2(Math.fromUnsignedDecimal(maxX)))));
         uint256 maxP = Math.pow(maxX, maxY);
         console2.log(maxP, "maxP");
     }
 
     function testFuzz_pow(uint256 x, uint256 y) public {
         // (1, 2 ^32)
-        x = bound(x, 1e18 * 436 / 100 / uint256(1<<32), uint256(1<<32) * 10000 / 14143 * 1e18);
+        x = bound(x, 1e18 * 436 / 100 / uint256(1 << 32), uint256(1 << 32) * 10000 / 14143 * 1e18);
         // (1e18, 2e18)
         y = bound(y, 1e18 + 1, 2e18 - 1);
 
