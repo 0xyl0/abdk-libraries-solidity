@@ -464,6 +464,11 @@ library ABDKMath64x64 {
     }
   }
 
+  function pow(uint256 _base, uint256 _exponent) internal returns (uint256) {
+    // _base ^ _exponent = 2 ^ (_exponent * log_2(_base))
+    return toUnsignedDecimal(exp_2(mul(fromUnsignedDecimal(_exponent), log_2(fromUnsignedDecimal(_base)))));
+  }
+
   /**
    * Calculate sqrt (x) rounding down.  Revert if x < 0.
    *

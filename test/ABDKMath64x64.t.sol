@@ -28,6 +28,8 @@ contract ABDKMath64x64 is Test {
     }
 
     function test_log_2() public {
+        console2.log(" -- log_2 --");
+
         // min
         console2.log("min fixed point 64.64");
         int128 minLog = Math.log_2(1);
@@ -45,7 +47,7 @@ contract ABDKMath64x64 is Test {
 
         // max
         console2.log("");
-        console2.log("min fixed point 64.64");
+        console2.log("max fixed point 64.64");
         int128 maxLog = Math.log_2(Math.MAX_64x64);
         assertEq(Math.MAX_64x64, type(int128).max, "Wrong fixed point max");
         console2.log(Math.toUnsignedDecimal(Math.MAX_64x64), "max to dec (2^63-1)");
@@ -69,6 +71,8 @@ contract ABDKMath64x64 is Test {
     }
 
     function test_exp_2() public {
+        console2.log(" -- exp_2 --");
+
         // min
         console2.log("min fixed point 64.64");
         int128 min = -0x400000000000000000;
@@ -129,5 +133,59 @@ contract ABDKMath64x64 is Test {
     function testFuzz_exp_2(int256 x) public {
         x = bound(x, int256(-64 * int256(Math.DECIMAL_PRECISION)), int256(63 * Math.DECIMAL_PRECISION - 1));
         Math.exp_2(Math.fromDecimal(x));
+    }
+
+    // We assume max exponent 2e18
+    function test_pow() public {
+        console2.log(" -- pow --");
+
+        // min
+        console2.log("");
+        console2.log("min");
+        /* TODO!!
+         * y log x >= -59.8e18 (from log_2 min uint test), y < 2e18
+         * log x >= -29.8
+         * x >= 1e18 * 2^2.2 / 2^32
+         */
+        uint256 minX = 1e18 * 436 / 100 / uint256(1<<32);
+        //uint256 minX = 1e10;
+        uint256 minY = 2e18 - 1;
+        console2.log(minX, "minX");
+        //console2.log("mul:");
+        //console2.log(Math.mul(Math.fromUnsignedDecimal(minY), Math.log_2(Math.fromUnsignedDecimal(minX))));
+        //console2.log(Math.toDecimal(Math.mul(Math.fromUnsignedDecimal(minY), Math.log_2(Math.fromUnsignedDecimal(minX)))));
+        uint256 minP = Math.pow(minX, minY);
+        console2.log(minP, "minP");
+        assertGt(minP, 0, "Reached product zero");
+
+        // max
+        console2.log("");
+        console2.log("max");
+        /*
+         * y log x <= 63e18 - 1, y < 2e18
+         * log x <= (63e18 - 1) / 2e18 ~= 31.5
+         * x <= 2^(31.5) = 2^32 / 2^(1/2) <= 2^32 / 1.4143
+         */
+        uint256 maxX = uint256(1<<32) * 10000 / 14143 * 1e18;
+        uint256 maxY = 2e18 - 1;
+        console2.log(maxX, "maxX");
+        //console2.log("mul:");
+        //console2.log(Math.mul(Math.fromUnsignedDecimal(maxY), Math.log_2(Math.fromUnsignedDecimal(maxX))));
+        //console2.log(Math.toDecimal(Math.mul(Math.fromUnsignedDecimal(maxY), Math.log_2(Math.fromUnsignedDecimal(maxX)))));
+        uint256 maxP = Math.pow(maxX, maxY);
+        console2.log(maxP, "maxP");
+    }
+
+    function testFuzz_pow(uint256 x, uint256 y) public {
+        // (1, 2 ^32)
+        x = bound(x, 1e18 * 436 / 100 / uint256(1<<32), uint256(1<<32) * 10000 / 14143 * 1e18);
+        // (1e18, 2e18)
+        y = bound(y, 1e18 + 1, 2e18 - 1);
+
+        console2.log(x, "x");
+        console2.log(y, "y");
+
+        uint256 p = Math.pow(x, y);
+        assertGt(p, 0, "Reached product zero");
     }
 }
